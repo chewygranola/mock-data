@@ -165,11 +165,32 @@ AND       c.relstorage IN ('a','h','c')
 %s 
 ORDER BY  1
 `
+
+	// Only GPDB7 has this table
+	_, err := ExecuteDB("select count(1) from pg_sequence")
+	if err == nil {
+		query = `
+		SELECT    n.nspname AS SCHEMA, 
+				  c.relname AS TABLE 
+		FROM      pg_catalog.pg_class c 
+		LEFT JOIN pg_catalog.pg_namespace n 
+		ON        n.oid = c.relnamespace 
+		WHERE     c.relkind IN ( 'r', 'p' ) 
+		AND       n.nspname <> 'pg_catalog' 
+		AND       n.nspname <> 'information_schema' 
+		AND       n.nspname !~ '^pg_toast' 
+		AND       n.nspname <> 'gp_toolkit' 
+		AND       c.relkind = 'r' 
+		%s 
+		ORDER BY  1
+		`
+	}
+	
 	// add where clause
 	query = fmt.Sprintf(query, whereClause)
 
 	// execute the query
-	_, err := db.Query(&result, query)
+	_, err = db.Query(&result, query)
 	if err != nil {
 		Debugf("query: %s", query)
 		Fatalf("Encountered error when getting all the tables from GPDB, err: %v", err)
