@@ -180,7 +180,6 @@ ORDER BY  1
 		AND       n.nspname <> 'information_schema' 
 		AND       n.nspname !~ '^pg_toast' 
 		AND       n.nspname <> 'gp_toolkit' 
-		AND       c.relkind = 'r' 
 		%s 
 		ORDER BY  1
 		`
